@@ -22,25 +22,16 @@
             transform: translate(-50%, -50%);
             text-align: center;
             color: #fff;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             animation: fadeIn 3s ease-in-out;
             background: rgba(0, 0, 0, 0.5);
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
-            width: 90%;
-            max-width: 400px;
         }
 
         .poem span {
             display: block;
             margin-bottom: 1rem;
-        }
-
-        .poem .signature {
-            margin-top: 2rem;
-            font-size: 1rem;
-            font-style: italic;
-            color: #ff69b4;
         }
 
         .surprise-text {
@@ -50,7 +41,7 @@
             transform: translate(-50%, 0);
             text-align: center;
             color: #fff;
-            font-size: 1rem;
+            font-size: 1.2rem;
             animation: fadeIn 3s ease-in-out;
         }
 
@@ -61,27 +52,6 @@
 
         canvas {
             display: block;
-        }
-
-        .fallback {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        .no-webgl .fallback {
-            display: block;
-        }
-
-        .no-webgl canvas {
-            display: none;
         }
     </style>
 </head>
@@ -97,134 +67,126 @@
         <span>For my angel, my queen, sent from above.</span>
         <span>Happy Birthday, my forever star,</span>
         <span>I cherish you deeply, just as you are.</span>
-        <span>I love you baby.</span>
-        <div class="signature">- From Devi</div>
+        <span>I Love you baby</span>
+        <div class="signature">-Devi</div>
+
     </div>
 
     <div class="surprise-text">
         <span>PS: Click the stars for hidden messages ✨</span>
     </div>
 
-    <div class="fallback">
-        <p>Your device does not support WebGL, but I still want you to know:</p>
-        <p>Happy Birthday! You’re my everything! 🌟</p>
-    </div>
-
     <script>
-        if (!WEBGL.isWebGLAvailable()) {
-            document.body.classList.add('no-webgl');
-        } else {
-            // Scene setup
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-            // Orbit controls
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.1;
+        // Orbit controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
 
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-            scene.add(ambientLight);
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
 
-            const pointLight = new THREE.PointLight(0xff69b4, 1.5, 100);
-            pointLight.position.set(5, 5, 5);
-            scene.add(pointLight);
+        const pointLight = new THREE.PointLight(0xff69b4, 1.5, 100);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
 
-            // Create a 3D heart shape
-            const heartShape = new THREE.Shape();
-            heartShape.moveTo(0, 0.3);
-            heartShape.bezierCurveTo(0.25, 0.6, 0.6, 0.6, 0.6, 0.3);
-            heartShape.bezierCurveTo(0.6, -0.1, 0, -0.3, 0, -0.6);
-            heartShape.bezierCurveTo(0, -0.3, -0.6, -0.1, -0.6, 0.3);
-            heartShape.bezierCurveTo(-0.6, 0.6, -0.25, 0.6, 0, 0.3);
+        // Create a 3D heart shape
+        const heartShape = new THREE.Shape();
+        heartShape.moveTo(0, 0.3);
+        heartShape.bezierCurveTo(0.25, 0.6, 0.6, 0.6, 0.6, 0.3);
+        heartShape.bezierCurveTo(0.6, -0.1, 0, -0.3, 0, -0.6);
+        heartShape.bezierCurveTo(0, -0.3, -0.6, -0.1, -0.6, 0.3);
+        heartShape.bezierCurveTo(-0.6, 0.6, -0.25, 0.6, 0, 0.3);
 
-            const extrudeSettings = {
-                steps: 50,
-                depth: 0.2,
-                bevelEnabled: true,
-                bevelThickness: 0.03,
-                bevelSize: 0.02,
-                bevelSegments: 20
-            };
+        const extrudeSettings = {
+            steps: 50,
+            depth: 0.2,
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelSegments: 20
+        };
 
-            const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
-            const material = new THREE.MeshPhongMaterial({ color: 0xff69b4, shininess: 100 });
-            const heart = new THREE.Mesh(geometry, material);
-            scene.add(heart);
+        const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+        const material = new THREE.MeshPhongMaterial({ color: 0xff69b4, shininess: 100 });
+        const heart = new THREE.Mesh(geometry, material);
+        scene.add(heart);
 
-            // Position and rotate the heart
-            heart.rotation.x = -Math.PI / 2;
-            heart.position.y = -0.5;
-            heart.position.x = 1.2;
+        // Position and rotate the heart
+        heart.rotation.x = -Math.PI / 2;
+        heart.position.y = -0.5;
+        heart.position.x = 1.2;
 
-            // Add twinkling stars
-            const starGeometry = new THREE.BufferGeometry();
-            const starCount = 200;
-            const starPositions = new Float32Array(starCount * 3);
+        // Add twinkling stars
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 200;
+        const starPositions = new Float32Array(starCount * 3);
 
-            for (let i = 0; i < starCount * 3; i++) {
-                starPositions[i] = (Math.random() - 0.5) * 10;
-            }
-
-            starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-            const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
-            const stars = new THREE.Points(starGeometry, starMaterial);
-            scene.add(stars);
-
-            // Create personalized constellation
-            const constellationMaterial = new THREE.LineBasicMaterial({ color: 0xffd700 });
-            const constellationGeometry = new THREE.BufferGeometry();
-            const constellationPoints = [
-                new THREE.Vector3(-2, 1, -1),
-                new THREE.Vector3(-1, 2, 0),
-                new THREE.Vector3(0, 1.5, 0.5),
-                new THREE.Vector3(1, 2, 1),
-                new THREE.Vector3(2, 1, 1.5)
-            ];
-            constellationGeometry.setFromPoints(constellationPoints);
-            const constellation = new THREE.Line(constellationGeometry, constellationMaterial);
-            scene.add(constellation);
-
-            // Add interactivity for hidden messages
-            const messages = [
-                "You’re the best thing that’s ever happened to me.",
-                "Every day with you feels like a dream.",
-                "You’re my everything, my star, my world.",
-                "Your smile lights up my darkest nights.",
-                "Forever yours, with all my love.",
-                "I LOVE YOU <3"
-            ];
-
-            window.addEventListener('click', () => {
-                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-                alert(randomMessage);
-            });
-
-            // Add animation
-            function animateScene() {
-                heart.rotation.y += 0.01;
-                stars.rotation.y += 0.002;
-                constellation.rotation.y += 0.001;
-                controls.update();
-                renderer.render(scene, camera);
-                requestAnimationFrame(animateScene);
-            }
-
-            // Responsive canvas
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-
-            // Set camera position and start animation
-            camera.position.set(1, 1, 2);
-            animateScene();
+        for (let i = 0; i < starCount * 3; i++) {
+            starPositions[i] = (Math.random() - 0.5) * 10;
         }
+
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        // Create personalized constellation
+        const constellationMaterial = new THREE.LineBasicMaterial({ color: 0xffd700 });
+        const constellationGeometry = new THREE.BufferGeometry();
+        const constellationPoints = [
+            new THREE.Vector3(-2, 1, -1),
+            new THREE.Vector3(-1, 2, 0),
+            new THREE.Vector3(0, 1.5, 0.5),
+            new THREE.Vector3(1, 2, 1),
+            new THREE.Vector3(2, 1, 1.5)
+        ];
+        constellationGeometry.setFromPoints(constellationPoints);
+        const constellation = new THREE.Line(constellationGeometry, constellationMaterial);
+        scene.add(constellation);
+
+        // Add interactivity for hidden messages
+        const messages = [
+            "You’re the best thing that’s ever happened to me.",
+            "Every day with you feels like a dream.",
+            "You’re my everything, my star, my world.",
+            "Your smile lights up my darkest nights.",
+            "Forever yours, with all my love.",
+            "I LOVE YOU <3"
+        ];
+
+        window.addEventListener('click', () => {
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            alert(randomMessage);
+        });
+
+        // Add animation
+        function animateScene() {
+            heart.rotation.y += 0.01;
+            stars.rotation.y += 0.002;
+            constellation.rotation.y += 0.001;
+            controls.update();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animateScene);
+        }
+
+        // Responsive canvas
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Set camera position and start animation
+        camera.position.set(1, 1, 2);
+        animateScene();
     </script>
 </body>
 </html>
