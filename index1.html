@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: url('https://source.unsplash.com/1920x1080/?galaxy') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .poem {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #fff;
+            font-size: 1.8rem;
+            animation: fadeIn 3s ease-in-out;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .poem span {
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .surprise-text {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translate(-50%, 0);
+            text-align: center;
+            color: #fff;
+            font-size: 1.2rem;
+            animation: fadeIn 3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="poem">
+        <span>Happy Birthday, my sunshine, my heart,</span>
+        <span>From this very moment, we’ll never be apart.</span>
+        <span>Your smile is a sunrise that lights up my soul,</span>
+        <span>Your brown eyes a galaxy, making me whole.</span>
+        <span>I see love in every glance you send my way,</span>
+        <span>Like stars in the night, you brighten my day.</span>
+        <span>This little surprise is a token of my love,</span>
+        <span>For my angel, my queen, sent from above.</span>
+        <span>Happy Birthday, my forever star,</span>
+        <span>I cherish you deeply, just as you are.</span>
+        <span>I Love you baby</span>
+        <div class="signature">-Devi</div>
+
+    </div>
+
+    <div class="surprise-text">
+        <span>PS: Click the stars for hidden messages ✨</span>
+    </div>
+
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Orbit controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0xff69b4, 1.5, 100);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // Create a 3D heart shape
+        const heartShape = new THREE.Shape();
+        heartShape.moveTo(0, 0.3);
+        heartShape.bezierCurveTo(0.25, 0.6, 0.6, 0.6, 0.6, 0.3);
+        heartShape.bezierCurveTo(0.6, -0.1, 0, -0.3, 0, -0.6);
+        heartShape.bezierCurveTo(0, -0.3, -0.6, -0.1, -0.6, 0.3);
+        heartShape.bezierCurveTo(-0.6, 0.6, -0.25, 0.6, 0, 0.3);
+
+        const extrudeSettings = {
+            steps: 50,
+            depth: 0.2,
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelSegments: 20
+        };
+
+        const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+        const material = new THREE.MeshPhongMaterial({ color: 0xff69b4, shininess: 100 });
+        const heart = new THREE.Mesh(geometry, material);
+        scene.add(heart);
+
+        // Position and rotate the heart
+        heart.rotation.x = -Math.PI / 2;
+        heart.position.y = -0.5;
+        heart.position.x = 1.2;
+
+        // Add twinkling stars
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 200;
+        const starPositions = new Float32Array(starCount * 3);
+
+        for (let i = 0; i < starCount * 3; i++) {
+            starPositions[i] = (Math.random() - 0.5) * 10;
+        }
+
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        // Create personalized constellation
+        const constellationMaterial = new THREE.LineBasicMaterial({ color: 0xffd700 });
+        const constellationGeometry = new THREE.BufferGeometry();
+        const constellationPoints = [
+            new THREE.Vector3(-2, 1, -1),
+            new THREE.Vector3(-1, 2, 0),
+            new THREE.Vector3(0, 1.5, 0.5),
+            new THREE.Vector3(1, 2, 1),
+            new THREE.Vector3(2, 1, 1.5)
+        ];
+        constellationGeometry.setFromPoints(constellationPoints);
+        const constellation = new THREE.Line(constellationGeometry, constellationMaterial);
+        scene.add(constellation);
+
+        // Add interactivity for hidden messages
+        const messages = [
+            "You’re the best thing that’s ever happened to me.",
+            "Every day with you feels like a dream.",
+            "You’re my everything, my star, my world.",
+            "Your smile lights up my darkest nights.",
+            "Forever yours, with all my love.",
+            "I LOVE YOU <3"
+        ];
+
+        window.addEventListener('click', () => {
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            alert(randomMessage);
+        });
+
+        // Add animation
+        function animateScene() {
+            heart.rotation.y += 0.01;
+            stars.rotation.y += 0.002;
+            constellation.rotation.y += 0.001;
+            controls.update();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animateScene);
+        }
+
+        // Responsive canvas
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Set camera position and start animation
+        camera.position.set(1, 1, 2);
+        animateScene();
+    </script>
+</body>
+</html>
