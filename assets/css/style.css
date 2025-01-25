@@ -459,7 +459,7 @@ main {
 
 /*-----------------------------------*\
     #NAVBAR
-  \*-----------------------------------*/
+\*-----------------------------------*/
 
 .navbar {
     position: fixed;
@@ -500,7 +500,7 @@ main {
 
 /*-----------------------------------*\
     #ABOUT
-  \*-----------------------------------*/
+\*-----------------------------------*/
 
 .about .article-title {
     margin-bottom: 15px;
@@ -517,9 +517,9 @@ main {
     margin-bottom: 15px;
 }
 
-/**
-   * #service 
-   */
+/*-----------------------------------*\
+    #SERVICE
+\*-----------------------------------*/
 
 .service {
     margin-bottom: 35px;
@@ -576,9 +576,9 @@ main {
     line-height: 1.6;
 }
 
-/**
-   * #testimonials 
-   */
+/*-----------------------------------*\
+    #TESTIMONIALS
+\*-----------------------------------*/
 
 .testimonials {
     margin-bottom: 30px;
@@ -632,10 +632,6 @@ main {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-
-/**
-   * #testimonials-modal
-   */
 
 .modal-container {
     position: fixed;
@@ -756,9 +752,9 @@ main {
     line-height: 1.6;
 }
 
-/**
-   * #clients 
-   */
+/*-----------------------------------*\
+    #CLIENTS
+\*-----------------------------------*/
 
 .clients {
     margin-bottom: 15px;
@@ -801,10 +797,6 @@ main {
 .article-title {
     margin-bottom: 30px;
 }
-
-/**
-   * education and experience 
-   */
 
 .timeline {
     margin-bottom: 30px;
@@ -871,9 +863,9 @@ main {
     line-height: 1.6;
 }
 
-/**
-   * skills 
-   */
+/*-----------------------------------*\
+    #SKILLS
+\*-----------------------------------*/
 
 .skills-title {
     margin-bottom: 20px;
@@ -915,7 +907,7 @@ main {
 
 /*-----------------------------------*\
     #PORTFOLIO
-  \*-----------------------------------*/
+\*-----------------------------------*/
 
 .filter-list {
     display: none;
