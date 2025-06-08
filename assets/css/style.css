@@ -90,6 +90,28 @@
   --transition-2: 0.5s ease-in-out;
 }
 
+
+/* surprise button */
+.surprise-button {
+  display: inline-block;
+  padding: 0.75rem 1.75rem;
+  font-size: var(--fs-4);
+  font-weight: var(--fw-500);
+  font-family: var(--ff-poppins);
+  color: var(--white-1);
+  background: var(--bg-gradient-onyx);
+  border: 1px solid var(--light-gray-70);
+  border-radius: 100px;
+  box-shadow: var(--shadow-2);
+  text-decoration: none;
+  transition: var(--transition-1);
+}
+
+.surprise-button:hover {
+  background: var(--orange-yellow-crayola);
+}
+
+
 /*-----------------------------------*\
     #RESET
 \*-----------------------------------*/
