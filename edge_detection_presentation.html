@@ -555,8 +555,8 @@ h2 em { font-style: normal; font-weight: 600; }
     </p>
     <div class="metric-row" style="margin-top: clamp(1.2rem, 3vh, 2rem);">
       <div class="metric"><div class="metric-val">6</div><div class="metric-label">Detectors</div></div>
-      <div class="metric"><div class="metric-val">50</div><div class="metric-label">Images Tested</div></div>
-      <div class="metric"><div class="metric-val">1963</div><div class="metric-label">→ 2000</div></div>
+      <div class="metric"><div class="metric-val">308</div><div class="metric-label">Images Tested</div></div>
+      <div class="metric"><div class="metric-val">Time Frame</div><div class="metric-label">1963 → 2000</div></div>
     </div>
   </div>
 </div>
@@ -608,7 +608,7 @@ h2 em { font-style: normal; font-weight: 600; }
       <div class="col">
         <ul class="bullets">
           <li><strong>MRI images</strong> are 2D grayscale matrices where biological structures are encoded as varying proton densities</li>
-          <li><strong>Tumors are hard to spot:</strong> edges lack defined borders due to noise and low-contrast gradients</li>
+          <li><strong>Tumors are hard to spot:</strong> Edges lack defined borders due to noise and low-contrast gradients</li>
           <li><strong>Mathematical model:</strong> image is a sampled function f(i,j) = I(i·h, j·h) + η(i,j) where η is additive noise</li>
           <li><strong>Goal:</strong> estimate gradient ∇I from discrete, noisy samples to isolate healthy vs. pathological tissue</li>
         </ul>
@@ -643,7 +643,7 @@ h2 em { font-style: normal; font-weight: 600; }
       <div class="pipeline-step">
         <div class="pipeline-box">
           <div class="pipeline-box-title">Brain MRI Dataset</div>
-          <div class="pipeline-box-sub">50 brain scans + YOLO labels</div>
+          <div class="pipeline-box-sub">308 brain scans + YOLO labels</div>
         </div>
       </div>
       <div class="pipeline-arrow">→</div>
@@ -671,7 +671,7 @@ h2 em { font-style: normal; font-weight: 600; }
       <div class="pipeline-step">
         <div class="pipeline-box">
           <div class="pipeline-box-title">Aggregate</div>
-          <div class="pipeline-box-sub">Average metrics across 50 images</div>
+          <div class="pipeline-box-sub">Average metrics across 308 images</div>
         </div>
       </div>
     </div>
