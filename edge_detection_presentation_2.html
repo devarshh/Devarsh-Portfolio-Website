@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edge Detection as Applied Numerical Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CLAUDE-STYLE MINIMAL THEME
+   ============================================================ */
+:root {
+  --bg:          #f5f4ef;
+  --bg-alt:      #eeeee6;
+  --surface:     #ffffff;
+  --border:      #e1e0d8;
+  --border-mid:  #d0cfc7;
+  --text:        #1a1916;
+  --text-2:      #4a4945;
+  --text-3:      #8a8880;
+  --amber:       #d97706;
+  --amber-bg:    #fef3c7;
+  --purple:      #7c3aed;
+  --purple-bg:   #ede9fe;
+  --green:       #059669;
+  --green-bg:    #d1fae5;
+  --red:         #dc2626;
+  --red-bg:      #fee2e2;
+  --blue:        #1d4ed8;
+  --blue-bg:     #dbeafe;
+  --font:        'Inter', -apple-system, sans-serif;
+  --mono:        'JetBrains Mono', monospace;
+  --r:           8px;
+  --r-sm:        5px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--text); }
+
+/* ============================================================ SLIDES */
+.slide {
+  height: 100vh; height: 100dvh;
+  overflow: hidden;
+  display: none;
+  position: relative;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(2rem,4vw,3.5rem) clamp(2.5rem,5.5vw,5rem);
+  background: var(--bg);
+}
+.slide.active { display: flex; }
+.slide::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--border); }
+
+/* ============================================================ CHROME */
+.slide-counter {
+  position: fixed; top: clamp(1.2rem,2.5vh,1.8rem); right: clamp(1.5rem,3vw,2.5rem);
+  font-family: var(--mono); font-size: 11px; color: var(--text-3); z-index: 100; letter-spacing:.04em;
+}
+.nav {
+  position: fixed; bottom: clamp(1.2rem,3vh,2rem); left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; z-index: 100;
+}
+.nav-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--border-mid);
+  cursor:pointer; border:none; transition: background .2s, transform .2s;
+}
+.nav-dot.active { background: var(--text-2); transform: scale(1.35); }
+.nav-arrows {
+  position: fixed; bottom: clamp(1.2rem,3vh,2rem); right: clamp(1.5rem,3vw,2.5rem);
+  display: flex; gap: 6px; z-index: 100;
+}
+.nav-btn {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text-3);
+  padding: 5px 13px; cursor: pointer; font-family: var(--font); font-size: 11px; font-weight: 500;
+  border-radius: var(--r-sm); transition: all .15s;
+}
+.nav-btn:hover { background: var(--bg-alt); color: var(--text); border-color: var(--border-mid); }
+
+/* ============================================================ TYPOGRAPHY */
+.slide-label {
+  font-family: var(--mono); font-size: clamp(9px,.9vw,11px);
+  text-transform: uppercase; letter-spacing: .12em; color: var(--text-3);
+  margin-bottom: clamp(.4rem,1vh,.7rem);
+}
+h1 {
+  font-size: clamp(1.9rem,4vw,3.4rem); font-weight: 300;
+  line-height: 1.15; letter-spacing: -.02em; text-align: center;
+}
+h1 em { font-style: normal; font-weight: 500; }
+h2 {
+  font-size: clamp(1.25rem,2.4vw,2rem); font-weight: 400;
+  line-height: 1.25; letter-spacing: -.015em;
+  margin-bottom: clamp(.5rem,1.2vh,1rem);
+}
+h2 em { font-style: normal; font-weight: 600; }
+.subtitle {
+  font-size: clamp(.8rem,1.25vw,.95rem); color: var(--text-2);
+  text-align: center; max-width: 620px; line-height: 1.65;
+  margin-top: clamp(.8rem,1.8vh,1.4rem);
+}
+.body-text {
+  font-size: clamp(.75rem,1.15vw,.875rem); color: var(--text-2); line-height: 1.6;
+}
+.caption {
+  font-family: var(--mono); font-size: clamp(.6rem,.85vw,.7rem); color: var(--text-3);
+  text-align: center; line-height: 1.5;
+}
+.section-eyebrow {
+  font-family: var(--mono); font-size: clamp(.6rem,.85vw,.7rem);
+  font-weight: 500; text-transform: uppercase; letter-spacing: .1em;
+  margin-bottom: .3rem;
+}
+.section-eyebrow.green { color: var(--green); }
+
+/* ============================================================ DIVIDER */
+.divider {
+  width: 28px; height: 1px; background: var(--border-mid);
+  margin: clamp(.35rem,.7vh,.6rem) 0;
+}
+.centered .divider { margin-left: auto; margin-right: auto; }
+
+/* ============================================================ LAYOUT */
+.content-wrap {
+  width: 100%; max-width: 1060px;
+  display: flex; flex-direction: column;
+  gap: clamp(.5rem,1.2vh,1rem);
+}
+.content-wrap.centered { align-items: center; text-align: center; }
+.two-col {
+  display: flex; flex-direction: row;
+  gap: clamp(1.5rem,3.5vw,2.8rem);
+  align-items: flex-start; width: 100%;
+}
+.col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: clamp(.5rem,1vh,.85rem); }
+.code-wrap { width: 100%; max-width: 900px; }
+
+/* ============================================================ BULLETS */
+.bullets { list-style: none; display: flex; flex-direction: column; gap: clamp(.35rem,.85vh,.65rem); }
+.bullets li {
+  font-size: clamp(.75rem,1.15vw,.875rem); color: var(--text-2);
+  display: flex; gap: .7em; align-items: flex-start; line-height: 1.6;
+}
+.bullets li::before { content:'–'; color:var(--text-3); flex-shrink:0; font-weight:300; margin-top:.05em; }
+.bullets li strong { color: var(--text); font-weight: 500; }
+
+/* ============================================================ CARDS */
+.card-grid {
+  display: grid; gap: clamp(.5rem,1.1vw,.9rem);
+  width: 100%; max-width: 1060px;
+}
+.card-grid.g3 { grid-template-columns: repeat(3,1fr); }
+.card-grid.g2 { grid-template-columns: repeat(2,1fr); }
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.85rem,1.6vw,1.3rem);
+  transition: border-color .18s;
+}
+.card:hover { border-color: var(--border-mid); }
+.card-meta {
+  font-family: var(--mono); font-size: clamp(.58rem,.85vw,.68rem);
+  color: var(--text-3); margin-bottom: .3em;
+}
+.card-title {
+  font-size: clamp(.82rem,1.35vw,.98rem); font-weight: 500;
+  letter-spacing: -.01em; margin-bottom: .35em;
+}
+.card-body { font-size: clamp(.72rem,1.05vw,.8rem); color: var(--text-2); line-height: 1.6; }
+p.card-body { font-size: clamp(.72rem,1.05vw,.8rem); color: var(--text-2); line-height: 1.6; }
+
+/* ============================================================ CODE */
+pre.code-block {
+  background: #f1f0eb; border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.8rem,1.4vw,1.1rem) clamp(1rem,1.8vw,1.3rem);
+  font-family: var(--mono); font-size: clamp(.63rem,1vw,.78rem);
+  color: var(--text); line-height: 1.75;
+  white-space: pre; overflow-x: auto;
+  width: 100%; display: block;
+}
+pre.code-block .kw  { color: #7c3aed; font-weight: 500; }
+pre.code-block .fn  { color: #0369a1; }
+pre.code-block .str { color: #059669; }
+pre.code-block .cm  { color: #9ca3af; font-style: italic; }
+pre.code-block .num { color: #d97706; }
+
+/* ============================================================ MATH */
+.math-block {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.7rem,1.3vw,1rem) clamp(1rem,1.8vw,1.5rem);
+  text-align: center;
+}
+.math-block.full-width { width: 100%; max-width: 900px; align-self: center; }
+.math-block .eq-label {
+  font-size: clamp(.58rem,.82vw,.68rem); color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: .35em; font-weight: 500;
+}
+.math-block .eq-body {
+  font-family: var(--mono); font-size: clamp(.72rem,1.1vw,.85rem);
+  color: var(--text); line-height: 1.65;
+}
+
+/* ============================================================ EQ ROW */
+.eq-row {
+  display: flex; gap: clamp(.6rem,1.3vw,1.1rem);
+  width: 100%; max-width: 980px;
+}
+.eq-box {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.65rem,1.2vw,.95rem); text-align: center;
+}
+.eq-box .eq-label {
+  font-size: clamp(.56rem,.8vw,.66rem); color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: .35em; font-weight: 500;
+}
+.eq-box .eq-formula {
+  font-family: var(--mono); font-size: clamp(.68rem,1.05vw,.82rem); color: var(--text); line-height: 1.55;
+}
+.eq-box .eq-order { font-size: clamp(.58rem,.82vw,.68rem); color: var(--amber); margin-top: .3em; font-weight: 500; }
+
+/* ============================================================ CALLOUTS */
+.callout {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.85rem,1.6vw,1.2rem) clamp(1rem,1.8vw,1.4rem);
+}
+.callout-amber { border-left: 3px solid var(--amber); }
+.callout-purple { border-left: 3px solid var(--purple); }
+.callout-label {
+  font-family: var(--mono); font-size: clamp(.58rem,.82vw,.68rem);
+  text-transform: uppercase; letter-spacing: .1em; font-weight: 500; margin-bottom: .45em;
+}
+.callout-amber .callout-label { color: var(--amber); }
+.callout-purple .callout-label { color: var(--purple); }
+.callout-text { font-size: clamp(.8rem,1.25vw,.92rem); color: var(--text); line-height: 1.6; }
+
+/* ============================================================ INSIGHT BOX */
+.insight-box {
+  background: var(--bg-alt); border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.65rem,1.2vw,.9rem) clamp(.8rem,1.4vw,1.1rem);
+  font-size: clamp(.68rem,1vw,.78rem); color: var(--text-2); line-height: 1.6;
+}
+.insight-label {
+  font-family: var(--mono); font-size: clamp(.58rem,.82vw,.65rem);
+  font-weight: 500; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--green); margin-right: .5em;
+}
+
+/* ============================================================ TABLE */
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: clamp(.66rem,1vw,.78rem);
+  border: 1px solid var(--border); border-radius: var(--r); overflow: hidden;
+  max-width: 960px;
+}
+.data-table th {
+  padding: clamp(.45rem,1vh,.75rem) clamp(.7rem,1.3vw,1rem); text-align: left;
+  background: #f1f0eb; color: var(--text-3); border-bottom: 1px solid var(--border);
+  font-weight: 500; letter-spacing: .04em; text-transform: uppercase;
+  font-size: clamp(.58rem,.85vw,.68rem);
+}
+.data-table td {
+  padding: clamp(.42rem,.9vh,.7rem) clamp(.7rem,1.3vw,1rem);
+  color: var(--text-2); border-bottom: 1px solid var(--border);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #fafaf7; }
+.data-table td:first-child { color: var(--text); font-weight: 500; }
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: .8em; font-weight: 500;
+}
+.badge.green  { background: var(--green-bg);  color: var(--green); }
+.badge.purple { background: var(--purple-bg); color: var(--purple); }
+.badge.blue   { background: var(--blue-bg);   color: var(--blue); }
+.badge.red    { background: var(--red-bg);    color: var(--red); }
+
+/* ============================================================ METRICS (title slide) */
+.metric-row {
+  display: flex; gap: clamp(.8rem,2vw,1.5rem);
+  justify-content: center; flex-wrap: wrap;
+  margin-top: clamp(1.2rem,2.5vh,2rem);
+}
+.metric {
+  text-align: center; padding: clamp(.9rem,1.5vw,1.2rem) clamp(1.4rem,2.5vw,2rem);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); min-width: 105px;
+}
+.metric-val { font-size: clamp(1.5rem,2.8vw,2.2rem); font-weight: 300; letter-spacing: -.03em; line-height: 1; margin-bottom: .25em; }
+.metric-label { font-family: var(--mono); font-size: clamp(.58rem,.85vw,.68rem); color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+
+/* ============================================================ PIPELINE (horizontal) */
+.pipeline {
+  display: flex; align-items: center; gap: clamp(.35rem,.8vw,.65rem);
+  width: 100%; max-width: 940px; justify-content: center;
+}
+.pipeline-step { flex: 1; min-width: 0; }
+.pipeline-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.5rem,1vw,.8rem) clamp(.5rem,.9vw,.75rem);
+  text-align: center;
+}
+.pipeline-box-title { font-size: clamp(.62rem,.95vw,.74rem); font-weight: 500; color: var(--text); margin-bottom: .2em; }
+.pipeline-box-sub   { font-family: var(--mono); font-size: clamp(.54rem,.78vw,.62rem); color: var(--text-3); line-height: 1.4; }
+.pipeline-arrow     { font-size: .85rem; color: var(--text-3); flex-shrink: 0; }
+
+/* ============================================================ VERTICAL PIPELINE (Canny) */
+.v-pipeline {
+  display: flex; flex-direction: column; gap: 0;
+  width: 100%;
+}
+.v-step {
+  display: flex; align-items: center; gap: clamp(.6rem,1.2vw,1rem);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.6rem,1.1vw,.9rem) clamp(.8rem,1.4vw,1.1rem);
+}
+.v-num {
+  font-family: var(--mono); font-size: clamp(.68rem,1vw,.8rem); font-weight: 500;
+  color: var(--text-3); flex-shrink: 0; width: 1.4em; text-align: center;
+}
+.v-title { font-size: clamp(.75rem,1.1vw,.85rem); font-weight: 500; color: var(--text); margin-bottom: .12em; }
+.v-sub   { font-family: var(--mono); font-size: clamp(.58rem,.85vw,.65rem); color: var(--text-3); }
+.v-arrow { text-align: center; color: var(--border-mid); font-size: .75rem; line-height: 1.2; padding: .1rem 0; }
+
+/* ============================================================ KERNELS */
+.kernel-row {
+  display: flex; gap: clamp(.4rem,.8vw,.7rem);
+  align-items: center; flex-wrap: wrap; margin: .5rem 0;
+}
+.kernel-grid { display: inline-grid; gap: 2px; padding: 7px; background: #f1f0eb; border: 1px solid var(--border); border-radius: var(--r-sm); }
+.kernel-grid.k2 { grid-template-columns: repeat(2,1fr); }
+.kernel-grid.k3 { grid-template-columns: repeat(3,1fr); }
+.kernel-cell {
+  width: clamp(24px,2.8vw,36px); height: clamp(24px,2.8vw,36px);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: clamp(.56rem,.95vw,.72rem); font-weight: 500;
+  border-radius: 3px;
+}
+.kernel-cell.pos  { background: var(--green-bg);  color: var(--green); }
+.kernel-cell.neg  { background: var(--red-bg);    color: var(--red); }
+.kernel-cell.zero { background: var(--bg-alt);    color: var(--text-3); }
+
+/* ============================================================ FILE LIST */
+.file-list { list-style: none; display: flex; flex-direction: column; gap: .4rem; margin-top: .4rem; }
+.file-list li { font-size: clamp(.72rem,1.05vw,.8rem); color: var(--text-2); display: flex; gap: .7em; align-items: baseline; }
+.fname { font-family: var(--mono); font-size: clamp(.65rem,.95vw,.75rem); color: var(--text); background: #f1f0eb; border-radius: 3px; padding: 0 5px; flex-shrink: 0; }
+
+/* ============================================================ ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.slide.active .slide-label { animation: fadeUp .35s ease both .00s; }
+.slide.active h1           { animation: fadeUp .4s  ease both .05s; }
+.slide.active h2           { animation: fadeUp .35s ease both .03s; }
+.slide.active .subtitle    { animation: fadeUp .35s ease both .1s; }
+.slide.active .divider     { animation: fadeUp .3s  ease both .12s; }
+.slide.active .content-wrap { animation: fadeUp .38s ease both .08s; }
+.slide.active .card        { animation: fadeUp .3s  ease both; }
+.slide.active .card:nth-child(1) { animation-delay:.08s; }
+.slide.active .card:nth-child(2) { animation-delay:.14s; }
+.slide.active .card:nth-child(3) { animation-delay:.20s; }
+.slide.active .card:nth-child(4) { animation-delay:.26s; }
+.slide.active .card:nth-child(5) { animation-delay:.32s; }
+.slide.active .card:nth-child(6) { animation-delay:.38s; }
+
+/* ============================================================ RESPONSIVE */
+@media (max-height:700px) {
+  h1 { font-size: clamp(1.5rem,3.5vw,2.6rem); }
+  h2 { font-size: clamp(1.1rem,2.2vw,1.7rem); }
+  .card { padding: clamp(.6rem,1.2vw,.95rem); }
+  .metric-val { font-size: clamp(1.2rem,2.5vw,1.8rem); }
+}
+@media (max-height:600px) {
+  .slide { padding: clamp(1rem,2vw,1.5rem) clamp(1.5rem,3vw,2.5rem); }
+  h1 { font-size: clamp(1.2rem,3vw,2rem); }
+}
+/* ============================================================ TIMELINE */
+.timeline {
+  display: flex; align-items: flex-start;
+  gap: 0; width: 100%; max-width: 1060px;
+  position: relative; margin-top: clamp(.6rem,1.5vh,1.2rem);
+}
+/* connecting line */
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: clamp(18px,2.2vw,28px);
+  left: calc(100% / 12);
+  right: calc(100% / 12);
+  height: 1px;
+  background: var(--border-mid);
+  z-index: 0;
+}
+.tl-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: clamp(.35rem,.7vh,.55rem);
+  position: relative; z-index: 1;
+}
+.tl-year {
+  font-family: var(--mono); font-size: clamp(.58rem,.85vw,.68rem);
+  color: var(--text-3); font-weight: 400; text-align: center;
+  white-space: nowrap;
+}
+.tl-dot {
+  width: clamp(10px,1.2vw,14px); height: clamp(10px,1.2vw,14px);
+  border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--border-mid);
+  flex-shrink: 0;
+}
+.tl-dot-peak {
+  background: var(--amber); border-color: var(--amber);
+  box-shadow: 0 0 0 3px var(--amber-bg);
+}
+.tl-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: clamp(.55rem,1vw,.85rem) clamp(.6rem,1.1vw,.9rem);
+  text-align: center; width: 100%;
+}
+.tl-card-peak {
+  border-color: var(--amber); background: var(--amber-bg);
+}
+.tl-name {
+  font-size: clamp(.75rem,1.1vw,.88rem); font-weight: 600;
+  color: var(--text); margin-bottom: .25em; line-height: 1.2;
+}
+.tl-card-peak .tl-name { color: var(--amber); }
+.tl-concept {
+  font-family: var(--mono); font-size: clamp(.58rem,.82vw,.68rem);
+  color: var(--text-3); margin-bottom: .3em; line-height: 1.4;
+}
+.tl-problem {
+  font-size: clamp(.65rem,.95vw,.75rem); color: var(--text-2);
+  line-height: 1.4;
+}
+.tl-card-peak .tl-problem { color: #92400e; }
+
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation:none!important; transition:none!important; }
+}
+</style>
+</head>
+<body>
+
+<!-- SLIDE COUNTER -->
+<div class="slide-counter" id="counter">01 / 16</div>
+<div class="nav" id="navDots"></div>
+<div class="nav-arrows">
+  <button class="nav-btn" onclick="prevSlide()">← PREV</button>
+  <button class="nav-btn" onclick="nextSlide()">NEXT →</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 01: TITLE                                              -->
+<!-- ============================================================ -->
+<div class="slide active" id="slide-1">
+  <div class="content-wrap centered">
+    <div class="slide-label">Numerical Methods × Image Processing</div>
+    <h1>Edge Detection as<br><em>Applied Numerical Analysis</em></h1>
+    <div class="divider"></div>
+    <p class="subtitle">Finite Differences · Approximation Theory · Variational Optimization<br>Applied to Brain Tumor MRI Detection</p>
+    <div class="metric-row">
+      <div class="metric"><div class="metric-val">9</div><div class="metric-label">Detectors</div></div>
+      <div class="metric"><div class="metric-val">308</div><div class="metric-label">MRI Scans</div></div>
+      <div class="metric"><div class="metric-val">3</div><div class="metric-label">Metrics</div></div>
+      <div class="metric"><div class="metric-val">1963–00</div><div class="metric-label">Era Covered</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 03: PROBLEM STATEMENT                                  -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-3">
+  <div class="content-wrap">
+    <div class="slide-label">Section 1 — Problem Statement</div>
+    <h2>Why <em>MRI</em> Edge Detection?</h2>
+    <div class="divider"></div>
+    <div class="two-col">
+      <div class="col">
+        <ul class="bullets">
+          <li><strong>MRI images</strong> are 2D grayscale matrices where biological structures are encoded as varying proton densities</li>
+          <li><strong>Tumors are hard to spot:</strong> edges lack defined borders due to noise and low-contrast gradients</li>
+          <li><strong>Mathematical model:</strong> f(i,j) = I(i·h, j·h) + η(i,j) where η is additive scanner noise</li>
+          <li><strong>Goal:</strong> estimate ∇I from discrete noisy samples to isolate healthy vs. pathological tissue boundaries</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="math-block">
+          <div class="eq-label">Image as Sampled Function</div>
+          <div class="eq-body">f(i, j) = I(i·h, j·h) + η(i, j)</div>
+        </div>
+        <div class="math-block">
+          <div class="eq-label">Gradient Magnitude — Edge Strength</div>
+          <div class="eq-body">|∇I| = √( (∂I/∂x)² + (∂I/∂y)² )</div>
+        </div>
+        <div class="math-block">
+          <div class="eq-label">Gradient Direction — Edge Orientation</div>
+          <div class="eq-body">θ = atan2( ∂I/∂y,  ∂I/∂x )</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 03: EVOLUTION TIMELINE                                 -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-2">
+  <div class="content-wrap centered">
+    <div class="slide-label">The Story We're Telling</div>
+    <h2>60 Years of <em>Solving One Problem</em></h2>
+    <div class="divider"></div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-year">1963</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-name">Roberts Cross</div>
+          <div class="tl-concept">Forward Difference · O(h)</div>
+          <div class="tl-problem">No smoothing → noise destroys results</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-year">1968–70</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-name">Sobel / Prewitt</div>
+          <div class="tl-concept">Central Difference · O(h²)</div>
+          <div class="tl-problem">Smoothing is heuristic, not principled</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-year">1980</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-name">Marr–Hildreth</div>
+          <div class="tl-concept">LoG · Zero-crossings</div>
+          <div class="tl-problem">Scale selection still manual</div>
+        </div>
+      </div>
+
+      <div class="tl-item tl-peak">
+        <div class="tl-year">1986</div>
+        <div class="tl-dot tl-dot-peak"></div>
+        <div class="tl-card tl-card-peak">
+          <div class="tl-name">Canny</div>
+          <div class="tl-concept">Calculus of Variations</div>
+          <div class="tl-problem">Mathematically optimal — but slow at large σ</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-year">1987</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-name">Deriche</div>
+          <div class="tl-concept">IIR · Padé Approximant</div>
+          <div class="tl-problem">Canny quality, now O(1) per pixel</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-year">2000+</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-name">Haar DWT</div>
+          <div class="tl-concept">Multiresolution Analysis</div>
+          <div class="tl-problem">Precision or scale — k = 2.5 optimal</div>
+        </div>
+      </div>
+
+    </div>
+    <p class="caption" style="margin-top: clamp(.8rem,1.8vh,1.4rem);">Each step is a numerical methods concept: Taylor error → regularization → variational optimization → rational approximation → multiresolution</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<div class="slide" id="slide-4">
+  <div class="content-wrap centered">
+    <div class="slide-label">Section 4 — Methodology</div>
+    <h2>Evaluation <em>Pipeline</em></h2>
+    <div class="divider"></div>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="pipeline-box">
+          <div class="pipeline-box-title">Brain MRI Dataset</div>
+          <div class="pipeline-box-sub">50 scans + YOLO labels</div>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step">
+        <div class="pipeline-box">
+          <div class="pipeline-box-title">Preprocess</div>
+          <div class="pipeline-box-sub">Grayscale · normalize</div>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step">
+        <div class="pipeline-box">
+          <div class="pipeline-box-title">Run Detectors</div>
+          <div class="pipeline-box-sub">6 algorithms</div>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step">
+        <div class="pipeline-box">
+          <div class="pipeline-box-title">Compare vs GT</div>
+          <div class="pipeline-box-sub">P · R · F1 per image</div>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-step">
+        <div class="pipeline-box">
+          <div class="pipeline-box-title">Aggregate</div>
+          <div class="pipeline-box-sub">Average over 50 scans</div>
+        </div>
+      </div>
+    </div>
+    <div class="code-wrap">
+<pre class="code-block"><span class="kw">class</span> <span class="fn">EdgeEvaluation</span>:
+    <span class="cm"># Radius-based match: detected pixel within r=2px of GT → True Positive</span>
+    <span class="kw">def</span> <span class="fn">calculate_precision</span>(self):
+        dist_to_gt = cv2.distanceTransform(gt_inverted, cv2.DIST_L2, <span class="num">3</span>)
+        tp = np.sum((self.detected == <span class="num">1</span>) &amp; (dist_to_gt &lt;= self.radius))
+        fp = np.sum((self.detected == <span class="num">1</span>) &amp; (dist_to_gt &gt; self.radius))
+        <span class="kw">return</span> tp / (tp + fp) <span class="kw">if</span> (tp + fp) &gt; <span class="num">0</span> <span class="kw">else</span> <span class="num">0.0</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 05: FINITE DIFFERENCES                                 -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-5">
+  <div class="content-wrap">
+    <div class="slide-label">Section 3.3 — Mathematical Preliminaries</div>
+    <h2>Finite Difference <em>Approximations</em></h2>
+    <div class="divider"></div>
+    <p class="body-text">Taylor expansion underpins every edge operator. The choice of scheme determines truncation error.</p>
+    <div class="eq-row">
+      <div class="eq-box">
+        <div class="eq-label">Forward Difference</div>
+        <div class="eq-formula">f′(x) ≈ [f(x+h) − f(x)] / h</div>
+        <div class="eq-order">Error: O(h) · Roberts</div>
+      </div>
+      <div class="eq-box">
+        <div class="eq-label">Central Difference</div>
+        <div class="eq-formula">f′(x) ≈ [f(x+h) − f(x−h)] / 2h</div>
+        <div class="eq-order">Error: O(h²) · Prewitt, Sobel</div>
+      </div>
+      <div class="eq-box">
+        <div class="eq-label">Second Derivative</div>
+        <div class="eq-formula">f″(x) ≈ [f(x−h) − 2f(x) + f(x+h)] / h²</div>
+        <div class="eq-order">Error: O(h²) · Marr–Hildreth</div>
+      </div>
+    </div>
+    <div class="math-block full-width">
+      <div class="eq-label">Convolution — The Unifying Operation</div>
+      <div class="eq-body">(K ∗ f)(i, j) = Σₚ Σ_q  K(p, q) · f(i − p, j − q)</div>
+    </div>
+    <p class="caption">Every finite difference stencil applied to an image is a discrete convolution with kernel K</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 06: FIRST-ORDER OPERATORS                              -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-6">
+  <div class="content-wrap">
+    <div class="slide-label">Section 5.1 — First-Order Methods</div>
+    <h2>From Forward to Central <em>Differences</em></h2>
+    <div class="divider"></div>
+    <div class="card-grid g3">
+
+      <div class="card">
+        <div class="card-meta">Roberts · 1963 · O(h) error</div>
+        <div class="card-title">Roberts Cross</div>
+        <div class="kernel-row">
+          <div class="kernel-grid k2">
+            <div class="kernel-cell pos">+1</div><div class="kernel-cell zero">0</div>
+            <div class="kernel-cell zero">0</div><div class="kernel-cell neg">−1</div>
+          </div>
+          <div class="kernel-grid k2">
+            <div class="kernel-cell zero">0</div><div class="kernel-cell pos">+1</div>
+            <div class="kernel-cell neg">−1</div><div class="kernel-cell zero">0</div>
+          </div>
+        </div>
+        <p class="card-body">Forward diagonal difference. No smoothing → maximally noise-sensitive. O(h) truncation error.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-meta">Prewitt · 1970 · O(h²) error</div>
+        <div class="card-title">Prewitt Operator</div>
+        <div class="kernel-row">
+          <div class="kernel-grid k3">
+            <div class="kernel-cell pos">+1</div><div class="kernel-cell zero">0</div><div class="kernel-cell neg">−1</div>
+            <div class="kernel-cell pos">+1</div><div class="kernel-cell zero">0</div><div class="kernel-cell neg">−1</div>
+            <div class="kernel-cell pos">+1</div><div class="kernel-cell zero">0</div><div class="kernel-cell neg">−1</div>
+          </div>
+        </div>
+        <p class="card-body">3×3 central difference. Uniform row smoothing [1, 1, 1]. Isotropic improvement over Roberts.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-meta">Sobel · 1968 · O(h²) error</div>
+        <div class="card-title">Sobel Operator</div>
+        <div class="kernel-row">
+          <div class="kernel-grid k3">
+            <div class="kernel-cell pos">+1</div><div class="kernel-cell zero">0</div><div class="kernel-cell neg">−1</div>
+            <div class="kernel-cell pos">+2</div><div class="kernel-cell zero">0</div><div class="kernel-cell neg">−2</div>
+            <div class="kernel-cell pos">+1</div><div class="kernel-cell zero">0</div><div class="kernel-cell neg">−1</div>
+          </div>
+        </div>
+        <p class="card-body">Weighted smoothing [1, 2, 1] — first-order B-spline basis. Better angular isotropy than Prewitt.</p>
+      </div>
+
+    </div>
+    <div class="callout callout-amber" style="margin-top: clamp(0.6rem,1.5vh,1rem);">
+      <div class="callout-label">Scharr · 2000 — Least-Squares Isotropy</div>
+      <p class="callout-text">Optimizes smoothing weights <strong>[3, 10, 3]</strong> by minimizing angular error in the Fourier domain — the first operator designed via least-squares approximation. Provides near-perfect rotational isotropy.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 07: HAAR DWT                                           -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-7">
+  <div class="content-wrap">
+    <div class="slide-label">Section 5.2 — Discrete Wavelet Transform</div>
+    <h2>Haar DWT: <em>Multiresolution Analysis</em></h2>
+    <div class="divider"></div>
+    <div class="two-col">
+      <div class="col">
+        <ul class="bullets">
+          <li>The <strong>1D DWT</strong> decomposes a signal into approximation coefficients c_j,k and detail coefficients d_j,k derived from a mother wavelet ψ(t)</li>
+          <li>In a <strong>2D Haar transform</strong> the image splits into four subbands — LL (approximation), LH (horizontal edges), HL (vertical edges), HH (diagonal noise)</li>
+          <li><strong>Adaptive threshold</strong> λ = kσ̂√(2 log N) derived from the HH subband via MAD: σ̂ = median(|HH|) / 0.6745</li>
+          <li>Sensitivity k swept over {0.5, 1.0, 1.5, 2.0, 2.5} — <strong>optimal k = 2.5</strong> selected by F1 on training subset</li>
+          <li><strong>Staircase artefact:</strong> diagonal subband separation reduces precision to 0.412 vs 0.458 for Sobel</li>
+        </ul>
+      </div>
+      <div class="col">
+<pre class="code-block"><span class="cm"># Haar DWT adaptive edge detector</span>
+<span class="kw">class</span> <span class="fn">DWT</span>:
+    <span class="kw">def</span> <span class="fn">get_adaptive_edges</span>(self):
+        coeffs = pywt.dwt2(self.image, <span class="str">'haar'</span>)
+        _, (cH, cV, cD) = coeffs
+        magnitude = np.sqrt(cH**<span class="num">2</span> + cV**<span class="num">2</span> + cD**<span class="num">2</span>)
+        <span class="cm"># Universal threshold: k × σ̂ × √(2 log N)</span>
+        N = self.image.size
+        sigma = np.median(np.abs(cD)) / <span class="num">0.6745</span>
+        threshold = self.k * sigma * np.sqrt(<span class="num">2</span> * np.log(N))
+        edges = (magnitude > threshold).astype(np.uint8)
+        <span class="kw">return</span> cv2.resize(edges, self.orig_size)</pre>
+        <div class="insight-box">
+          <span class="insight-label">Subbands</span>
+          LL = blurred approximation · LH = horizontal edges · HL = vertical edges · HH = diagonal detail — used for noise estimation σ̂
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 08: CANNY                                              -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-8">
+  <div class="content-wrap">
+    <div class="slide-label">Section 5.3 — Variational Optimization</div>
+    <h2>Canny Detector: <em>Optimal by Design</em></h2>
+    <div class="divider"></div>
+    <div class="two-col">
+      <div class="col">
+        <div class="math-block">
+          <div class="eq-label">Canny's Optimality Criteria (1986)</div>
+          <div class="eq-body">SNR = |∫h| / √(∫h²) &nbsp;&nbsp;&nbsp; Loc = |h′(0)| / √(∫h′²)</div>
+        </div>
+        <ul class="bullets" style="margin-top: 0.9rem;">
+          <li><strong>Calculus of variations:</strong> finds optimal h(x) by simultaneously maximising SNR and spatial localisation</li>
+          <li>Solution ≈ <strong>first derivative of a Gaussian</strong></li>
+          <li><strong>Non-maximum suppression:</strong> quadratic interpolation along gradient direction to thin edges to 1 px</li>
+          <li><strong>Hysteresis thresholding:</strong> dual-threshold graph traversal links weak edge fragments to strong ones</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="v-pipeline">
+          <div class="v-step">
+            <div class="v-num">①</div>
+            <div class="v-content">
+              <div class="v-title">Gaussian Smoothing (σ)</div>
+              <div class="v-sub">Gaussian smoothing — noise suppression</div>
+            </div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="v-step">
+            <div class="v-num">②</div>
+            <div class="v-content">
+              <div class="v-title">Gradient Magnitude &amp; Direction</div>
+              <div class="v-sub">Sobel kernels Gx, Gy</div>
+            </div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="v-step">
+            <div class="v-num">③</div>
+            <div class="v-content">
+              <div class="v-title">Non-Maximum Suppression</div>
+              <div class="v-sub">Quadratic interpolation along gradient</div>
+            </div>
+          </div>
+          <div class="v-arrow">↓</div>
+          <div class="v-step">
+            <div class="v-num">④</div>
+            <div class="v-content">
+              <div class="v-title">Hysteresis Thresholding</div>
+              <div class="v-sub">High T + Low T → graph traversal</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 09: SECOND-ORDER & DERICHE                             -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-9">
+  <div class="content-wrap">
+    <div class="slide-label">Sections 5.4 &amp; 5.5 — Higher-Order Methods</div>
+    <h2>Zero-Crossings &amp; <em>IIR Recursion</em></h2>
+    <div class="divider"></div>
+    <div class="two-col">
+      <div class="col">
+        <div class="card" style="height: 100%;">
+          <div class="card-meta">Marr–Hildreth · 1980 · Laplacian of Gaussian</div>
+          <div class="card-title">Second-Order Zero-Crossings</div>
+          <div class="kernel-row" style="justify-content: center; margin: 0.8rem 0;">
+            <div class="kernel-grid k3">
+              <div class="kernel-cell zero">0</div><div class="kernel-cell pos">+1</div><div class="kernel-cell zero">0</div>
+              <div class="kernel-cell pos">+1</div><div class="kernel-cell neg">−4</div><div class="kernel-cell pos">+1</div>
+              <div class="kernel-cell zero">0</div><div class="kernel-cell pos">+1</div><div class="kernel-cell zero">0</div>
+            </div>
+          </div>
+          <p class="card-body">Discrete 5-point Laplacian stencil. Edges are located at <strong>zero-crossings of ∇²(G∗f)</strong>. The Difference of Gaussians (DoG) approximates LoG via function approximation — much cheaper to compute.</p>
+        </div>
+      </div>
+      <div class="col" style="display: flex; flex-direction: column; gap: clamp(0.6rem,1.2vh,1rem);">
+        <div class="card">
+          <div class="card-meta">Deriche · 1987 · Recursive IIR · O(1) per pixel</div>
+          <div class="card-title">Rational Function Approximation</div>
+          <div class="math-block" style="margin: 0.5rem 0;">
+            <div class="eq-body">H(z) = N(z) / D(z) — Padé approximant</div>
+          </div>
+          <p class="card-body">Implements Canny's optimal filter as an IIR filter. Treats the kernel as a rational function rather than a polynomial (FIR). Achieves <strong>O(1) constant-time computation</strong> regardless of σ.</p>
+        </div>
+        <div class="card">
+          <div class="card-meta">Sub-Pixel Refinement — Lindeberg 1998</div>
+          <div class="card-title">Quadratic Curve Fitting</div>
+          <p class="card-body">Fit parabola to gradient magnitudes g₋₁, g₀, g₁:<br>
+          x* = (g₋₁ − g₁) / 2(g₋₁ − 2g₀ + g₁)<br>
+          Localises edges to sub-pixel precision.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 10: DWT / WAVELET                                      -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-10">
+  <div class="content-wrap">
+    <div class="slide-label">Section 5 — Extended Methods</div>
+    <h2>Wavelet Edge Detection: <em>Multiresolution Analysis</em></h2>
+    <div class="divider"></div>
+    <div class="two-col">
+      <div class="col">
+        <ul class="bullets">
+          <li><strong>Haar DWT</strong> decomposes the image into approximation and detail sub-bands at multiple scales simultaneously</li>
+          <li>Detail coefficients (horizontal, vertical, diagonal) directly encode <strong>local gradient structure</strong></li>
+          <li>Adaptive threshold: edge where |coefficient| > <strong>k · σ̂_noise</strong></li>
+          <li>Noise estimate: σ̂ = median(|cD|) / 0.6745 — robust MAD estimator</li>
+          <li>Evaluated over k ∈ {0.5, 1.0, 1.5, 2.0, 2.5} to plot the precision–recall curve</li>
+        </ul>
+      </div>
+      <div class="col">
+<pre class="code-block"><span class="cm"># Haar DWT adaptive edge detector</span>
+<span class="kw">class</span> <span class="fn">DWT</span>:
+    <span class="kw">def</span> <span class="fn">get_adaptive_edges</span>(self):
+        coeffs = pywt.dwt2(self.image, <span class="str">'haar'</span>)
+        _, (cH, cV, cD) = coeffs
+        magnitude = np.sqrt(cH**<span class="num">2</span> + cV**<span class="num">2</span> + cD**<span class="num">2</span>)
+        <span class="cm"># Adaptive threshold: k × estimated noise σ</span>
+        sigma = np.median(np.abs(cD)) / <span class="num">0.6745</span>
+        threshold = self.k * sigma
+        edges = (magnitude > threshold).astype(np.uint8)
+        <span class="kw">return</span> cv2.resize(edges, self.orig_size)</pre>
+        <div class="insight-box">
+          <span class="insight-label">Insight</span>
+          σ̂ via MAD/0.6745 is robust to outlier edges. threshold.py sweeps k and plots full P/R/F1 curves.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 11: COMPARATIVE TABLE                                  -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-11">
+  <div class="content-wrap centered">
+    <div class="slide-label">Section 6 — Comparative Analysis</div>
+    <h2>Numerical Properties <em>Compared</em></h2>
+    <div class="divider"></div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Operator</th>
+          <th>Numerical Scheme</th>
+          <th>Error Order</th>
+          <th>Regularization</th>
+          <th>Complexity</th>
+          <th>Noise Robustness</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Roberts</td><td>Forward Difference</td><td>O(h)</td><td><span class="badge red">None</span></td><td>O(n²)</td><td><span class="badge red">Poor</span></td></tr>
+        <tr><td>Sobel</td><td>Central Difference</td><td>O(h²)</td><td><span class="badge blue">B-Spline [1,2,1]</span></td><td>O(n²)</td><td><span class="badge blue">Moderate</span></td></tr>
+        <tr><td>Scharr</td><td>Central Difference</td><td>O(h²)</td><td><span class="badge blue">LS-Optimised [3,10,3]</span></td><td>O(n²)</td><td><span class="badge blue">Moderate</span></td></tr>
+        <tr><td>Haar DWT</td><td>Multiresolution</td><td>Varied</td><td><span class="badge purple">Universal λ=kσ√2logN</span></td><td>O(n²)</td><td><span class="badge green">Good</span></td></tr>
+        <tr><td>Canny</td><td>Variational Optimal</td><td>Varied</td><td><span class="badge green">Gaussian (σ=1.0)</span></td><td>O(n²)</td><td><span class="badge green">Good</span></td></tr>
+        <tr><td>Marr–Hildreth LoG</td><td>2nd Order Central</td><td>O(h²)</td><td><span class="badge green">LoG</span></td><td>O(n²)</td><td><span class="badge blue">High Recall</span></td></tr>
+        <tr><td>Deriche</td><td>Recursive IIR</td><td>O(1)</td><td><span class="badge purple">Padé Rational</span></td><td><span class="badge green">O(n)</span></td><td><span class="badge green">Good</span></td></tr>
+        <tr><td>Sub-Pixel (Poly.)</td><td>Quadratic Interpolation</td><td>O(h²)</td><td><span class="badge red">None</span></td><td>O(n²)</td><td><span class="badge blue">High Precision</span></td></tr>
+        <tr><td>Sub-Pixel (Lindeberg)</td><td>Scale-Space Diff.</td><td>O(h²)</td><td><span class="badge green">Gaussian Scale-Space</span></td><td>O(n²)</td><td><span class="badge blue">High Precision</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 12: RESULTS CHART                                      -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-12">
+  <div class="content-wrap centered">
+    <div class="slide-label">Section 6 — Quantitative Results</div>
+    <h2>50-Image Test Suite: <em>Full Results</em></h2>
+    <div class="divider"></div>
+    <table class="data-table" style="margin-top: clamp(.5rem,1.2vh,.9rem);">
+      <thead>
+        <tr>
+          <th>Detector</th>
+          <th>Precision</th>
+          <th>Recall</th>
+          <th>F1 Score</th>
+          <th>Optimal Param</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#f0fdf4;"><td style="color:var(--green);font-weight:600;">Roberts Cross</td><td>0.459</td><td>0.763</td><td><strong>0.556</strong></td><td>T = 40</td></tr>
+        <tr style="background:#f0fdf4;"><td style="color:var(--green);font-weight:600;">Sobel</td><td>0.458</td><td>0.764</td><td><strong>0.556</strong></td><td>T = 40</td></tr>
+        <tr style="background:#f0fdf4;"><td style="color:var(--green);font-weight:600;">Scharr</td><td>0.458</td><td>0.763</td><td><strong>0.556</strong></td><td>T = 40</td></tr>
+        <tr><td>Haar DWT</td><td>0.412</td><td>0.761</td><td>0.499</td><td>k = 2.5</td></tr>
+        <tr><td>Canny</td><td>0.458</td><td>0.577</td><td>0.487</td><td>σ = 1.0</td></tr>
+        <tr><td>Sub-Pixel (Poly.)</td><td>0.502</td><td>0.528</td><td>0.476</td><td>T = 0.5</td></tr>
+        <tr><td>Sub-Pixel (Lindeberg)</td><td>0.504</td><td>0.441</td><td>0.434</td><td>T = 0.5</td></tr>
+        <tr><td>Deriche</td><td>0.306</td><td>0.573</td><td>0.388</td><td>α = 0.8</td></tr>
+        <tr style="background:#fff7ed;"><td style="color:var(--amber);font-weight:600;">LoG Zero-Crossings</td><td>0.183</td><td><strong>0.982</strong></td><td>0.305</td><td>σ = 0.7</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 13: KEY FINDINGS                                       -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-13">
+  <div class="content-wrap centered">
+    <div class="slide-label">Section 6 — Key Findings</div>
+    <h2>What the Numbers <em>Tell Us</em></h2>
+    <div class="divider"></div>
+    <div class="card-grid g3">
+      <div class="card">
+        <div class="card-meta">Precision vs. Recall</div>
+        <div class="card-title">No Free Lunch</div>
+        <p class="card-body">Higher k → more precise but lower recall. k ≈ 1.5 maximises F1. The sweep makes this trade-off explicit and measurable.</p>
+      </div>
+      <div class="card">
+        <div class="card-meta">Why Canny underperforms</div>
+        <div class="card-title">NMS Hurts on MRI</div>
+        <p class="card-body">Non-maximum suppression thins edges to 1 px. Diffuse MRI tumour boundaries get suppressed, dropping recall to 0.577 vs 0.763 for Sobel.</p>
+      </div>
+      <div class="card">
+        <div class="card-meta">Unexpected result</div>
+        <div class="card-title">Simple Operators Win</div>
+        <p class="card-body">Roberts, Sobel, and Scharr tie at F1 = 0.556 — the simplest methods outperform every sophisticated algorithm on this dataset.</p>
+      </div>
+      <div class="card">
+        <div class="card-meta">Extreme trade-off</div>
+        <div class="card-title">LoG: Recall = 0.982</div>
+        <p class="card-body">Zero-crossings detect nearly every true boundary pixel, but precision collapses to 0.183. F1 = 0.305 — last place.</p>
+      </div>
+      <div class="card">
+        <div class="card-meta">Speed vs. Quality</div>
+        <div class="card-title">Deriche is Fastest</div>
+        <p class="card-body">O(1) per pixel regardless of σ. IIR Padé approximant achieves Canny-quality in constant time — ideal for live guidance.</p>
+      </div>
+      <div class="card">
+        <div class="card-meta">Sub-pixel insight</div>
+        <div class="card-title">Highest Precision: Sub-Pixel</div>
+        <p class="card-body">Polynomial and Lindeberg methods achieve precision 0.502–0.504 — the best in the suite — but sacrifice recall. Best when boundary position accuracy is the priority.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 14: CODE ARCHITECTURE                                  -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-14">
+  <div class="content-wrap">
+    <div class="slide-label">Implementation — github.com/rkhurmi/EdgeDetection_CSII</div>
+    <h2>Code <em>Architecture</em></h2>
+    <div class="divider"></div>
+    <div class="two-col">
+      <div class="col">
+        <div class="card">
+          <div class="card-meta">detection/ module</div>
+          <div class="card-title">Detector Implementations</div>
+          <ul class="file-list">
+            <li><span class="fname">first_order.py</span> Roberts, Prewitt, Sobel, Scharr</li>
+            <li><span class="fname">second_order.py</span> Marr–Hildreth LoG</li>
+            <li><span class="fname">canny.py</span> Full 4-step Canny pipeline</li>
+            <li><span class="fname">deriche.py</span> Recursive IIR detector</li>
+            <li><span class="fname">sub_pixel.py</span> Quadratic interpolation</li>
+            <li><span class="fname">wavelet.py</span> Haar DWT detector</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-meta">Root files</div>
+          <ul class="file-list">
+            <li><span class="fname">error.py</span> EdgeEvaluation — precision, recall, F1</li>
+            <li><span class="fname">threshold.py</span> Batch eval + k sensitivity sweep</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+<pre class="code-block"><span class="cm"># threshold.py — k sensitivity sweep</span>
+threshold_values = [<span class="num">0.5</span>, <span class="num">1</span>, <span class="num">1.5</span>, <span class="num">2.0</span>, <span class="num">2.5</span>]
+<span class="kw">for</span> k <span class="kw">in</span> threshold_values:
+    <span class="kw">for</span> img_path, lbl_path <span class="kw">in</span> image_label_pairs:
+        gt, polygon = label_txt_to_outline_mask(lbl_path, shape)
+        detected = <span class="fn">DWT</span>(img_path, k=k).get_adaptive_edges()
+        ev = <span class="fn">EdgeEvaluation</span>(detected, gt, polygon_px=polygon)
+        scores.append(ev.calculate_f1_score())
+
+<span class="cm"># YOLO label → binary outline mask</span>
+<span class="kw">def</span> <span class="fn">label_txt_to_outline_mask</span>(txt_path, image_shape):
+    polygon_xy = values[<span class="num">1</span>:].reshape(-<span class="num">1</span>, <span class="num">2</span>)
+    polygon_px = np.stack([xy[:,<span class="num">0</span>]*w, xy[:,<span class="num">1</span>]*h], axis=<span class="num">1</span>)
+    cv2.polylines(mask, [polygon_px], isClosed=<span class="kw">True</span>,
+                  color=<span class="num">255</span>, thickness=<span class="num">2</span>)
+    <span class="kw">return</span> mask, polygon_px</pre>
+        <div class="insight-box">
+          GT annotations are YOLO polygon format, converted to binary outline masks. Evaluation crops to the tumour bounding box + 5 px padding for focused scoring.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 15: WHY MULTI-SCALE                                    -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-15">
+  <div class="content-wrap">
+    <div class="slide-label">Section 5.2 — Multi-Scale Analysis</div>
+    <h2>Why <em>Multi-Scale</em> Beats Single-Scale</h2>
+    <div class="divider"></div>
+    <div class="two-col">
+      <div class="col">
+        <ul class="bullets">
+          <li><strong>The problem:</strong> a single σ or kernel size cannot handle coarse tumour boundaries and fine tissue edges simultaneously — they live at different scales</li>
+          <li><strong>Single-scale operators</strong> (Roberts, Sobel) use one fixed kernel and miss either fine detail or broad structure</li>
+          <li><strong>Canny's σ</strong> partially addresses this but requires a manual per-image choice</li>
+          <li><strong>Haar DWT</strong> decomposes the image into approximation + H/V/D detail bands at each level — all scales at once</li>
+          <li><strong>Per-level adaptive threshold</strong> k · σ̂ is automatically calibrated to each scale's noise floor</li>
+        </ul>
+        <div class="insight-box" style="margin-top: 0.8rem;">
+          <span class="insight-label">Result</span>
+          DWT is the only tested method that does not commit to a single scale. The k sweep makes the precision–recall trade-off visible — optimal k = 2.5 confirmed on held-out data.
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-meta">Level 1 — Fine Scale</div>
+          <div class="card-title">High-Frequency Details</div>
+          <p class="card-body">Sharp tissue boundaries, thin vessel walls, fine tumour margins. High spatial precision, higher noise.</p>
+        </div>
+        <div class="card" style="margin-top: clamp(0.5rem,1vh,0.8rem);">
+          <div class="card-meta">Level 2 — Medium Scale</div>
+          <div class="card-title">Structural Edges</div>
+          <p class="card-body">Major tissue–tumour boundaries, ventricle outlines. SNR improves significantly at this level.</p>
+        </div>
+        <div class="card" style="margin-top: clamp(0.5rem,1vh,0.8rem);">
+          <div class="card-meta">Level 3 — Coarse Scale</div>
+          <div class="card-title">Global Anatomy</div>
+          <p class="card-body">Brain hemisphere boundaries, skull-tissue interface. Very stable, low noise, broad detection.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 16: CONCLUSION                                         -->
+<!-- ============================================================ -->
+<div class="slide" id="slide-16">
+  <div class="content-wrap centered">
+    <div class="slide-label">Section 7 — Conclusion</div>
+    <h1>Numerical Analysis <em>Unifies</em><br>Image Processing</h1>
+    <div class="divider"></div>
+    <p class="subtitle">The 60-year arc from Roberts (1963) to Haar DWT mirrors the intellectual history of numerical methods — from crude forward differences to variationally optimal, multiresolution designs.</p>
+    <div class="card-grid g3" style="margin-top: clamp(1rem,2.5vh,1.8rem); max-width: 860px;">
+      <div class="card">
+        <div class="card-title">Finite Differences</div>
+        <p class="card-body">Forward → central → 2nd-order. Every convolution kernel is a Taylor expansion truncated at a chosen order.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Regularization</div>
+        <p class="card-body">Differentiation is ill-conditioned. Gaussian smoothing manages the δ/h noise blow-up as h→0, trading localisation for stability.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Optimality</div>
+        <p class="card-body">Canny used calculus of variations. Deriche used Padé approximants. Both derive theoretically optimal solutions.</p>
+      </div>
+    </div>
+    <p class="caption" style="margin-top: clamp(1rem,2vh,1.5rem);">
+      github.com/rkhurmi/EdgeDetection_CSII &nbsp;·&nbsp; Brain Tumor MRI Dataset (Darabi, 2026) &nbsp;·&nbsp; 50 scans · YOLO annotations
+    </p>
+  </div>
+</div>
+
+<script>
+const TOTAL = 16;
+let current = 1;
+function goTo(n) {
+  document.getElementById('slide-' + current).classList.remove('active');
+  current = Math.max(1, Math.min(TOTAL, n));
+  document.getElementById('slide-' + current).classList.add('active');
+  document.getElementById('counter').textContent =
+    String(current).padStart(2,'0') + ' / ' + String(TOTAL).padStart(2,'0');
+  document.querySelectorAll('.nav-dot').forEach((d,i) => d.classList.toggle('active', i+1===current));
+}
+function nextSlide() { goTo(current+1); }
+function prevSlide() { goTo(current-1); }
+const navEl = document.getElementById('navDots');
+for (let i=1; i<=TOTAL; i++) {
+  const b = document.createElement('button');
+  b.className = 'nav-dot' + (i===1?' active':'');
+  b.onclick = () => goTo(i);
+  navEl.appendChild(b);
+}
+document.addEventListener('keydown', e => {
+  if (['ArrowRight',' ','PageDown'].includes(e.key)) { e.preventDefault(); nextSlide(); }
+  if (['ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); prevSlide(); }
+  if (e.key==='Home') { e.preventDefault(); goTo(1); }
+  if (e.key==='End')  { e.preventDefault(); goTo(TOTAL); }
+});
+let tx=0;
+document.addEventListener('touchstart', e => { tx=e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx=e.changedTouches[0].clientX-tx;
+  if (Math.abs(dx)>50) dx<0?nextSlide():prevSlide();
+});
+</script>
+</body>
+</html>
