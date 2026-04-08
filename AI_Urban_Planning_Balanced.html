@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI in Urban Planning — Present and Future</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+/* === ROOT — CLAUDE-INSPIRED PALETTE === */
+:root {
+  --c-bg: #FAF6F0;
+  --c-surface: #FFFFFF;
+  --c-surface-warm: #F5EFE7;
+  --c-border: #E8E0D4;
+  --c-border-light: #F0EAE0;
+  --c-text: #2D2B28;
+  --c-text-secondary: #6B6560;
+  --c-text-tertiary: #9B9590;
+  --c-claude: #DA7756;
+  --c-claude-light: rgba(218,119,86,0.08);
+  --c-claude-border: rgba(218,119,86,0.2);
+  --c-green: #2E6B4F;
+  --c-green-light: rgba(46,107,79,0.08);
+  --c-blue: #1B4F72;
+  --c-blue-light: rgba(27,79,114,0.08);
+  --font-display: 'Source Serif 4', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+/* === RESET === */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-snap-type: y mandatory; overflow-x: hidden; }
+body { background: var(--c-bg); color: var(--c-text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+
+/* === VIEWPORT BASE === */
+.slide {
+  height: 100vh; height: 100dvh;
+  overflow: hidden; scroll-snap-align: start;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: clamp(2rem, 5vh, 4rem) clamp(2rem, 8vw, 8rem);
+  position: relative;
+}
+.slide-inner {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 880px; max-height: 88vh;
+}
+
+/* === TYPOGRAPHY === */
+h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1.15; letter-spacing: -0.02em; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.5rem, 3.2vw, 2.3rem); line-height: 1.2; letter-spacing: -0.015em; margin-bottom: clamp(0.5rem, 1.2vh, 1rem); }
+h3 { font-family: var(--font-body); font-weight: 500; font-size: clamp(0.85rem, 1.3vw, 1.05rem); line-height: 1.35; }
+p, li { font-size: clamp(0.82rem, 1.2vw, 0.98rem); line-height: 1.65; color: var(--c-text-secondary); }
+.subtitle { font-family: var(--font-body); font-size: clamp(0.9rem, 1.5vw, 1.15rem); color: var(--c-text-secondary); font-weight: 300; line-height: 1.6; max-width: 580px; }
+.small { font-size: clamp(0.68rem, 0.85vw, 0.78rem); color: var(--c-text-tertiary); }
+.label { display: inline-block; font-family: var(--font-body); font-size: clamp(0.6rem, 0.8vw, 0.72rem); font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--c-claude); margin-bottom: clamp(0.3rem, 0.8vh, 0.6rem); }
+.rule { width: 40px; height: 1.5px; background: var(--c-claude); opacity: 0.5; border: none; margin: clamp(0.5rem, 1vh, 0.8rem) 0; }
+
+/* === CARDS === */
+.cards { display: grid; gap: clamp(0.5rem, 1vw, 0.8rem); margin-top: clamp(0.5rem, 1.2vh, 1rem); }
+.cards-3 { grid-template-columns: repeat(3, 1fr); }
+.cards-2 { grid-template-columns: repeat(2, 1fr); }
+.card { background: var(--c-surface); border: 1px solid var(--c-border-light); border-radius: var(--radius); padding: clamp(0.7rem, 1.3vw, 1.2rem); transition: box-shadow 0.25s ease; }
+.card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+.card h3 { margin-bottom: 0.3em; }
+.card p { font-size: clamp(0.72rem, 1vw, 0.88rem); }
+
+/* === STAT === */
+.stat { text-align: center; }
+.stat-value { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.6rem, 3.2vw, 2.4rem); line-height: 1; color: var(--c-claude); }
+.stat-label { font-size: clamp(0.62rem, 0.85vw, 0.76rem); color: var(--c-text-tertiary); margin-top: 0.3em; line-height: 1.4; }
+
+/* === FLOW === */
+.flow { display: flex; align-items: stretch; gap: clamp(0.2rem, 0.5vw, 0.4rem); flex-wrap: wrap; justify-content: center; margin-top: clamp(0.6rem, 1.5vh, 1.2rem); }
+.flow-node { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: clamp(0.5rem, 0.9vw, 0.8rem) clamp(0.6rem, 1.1vw, 0.9rem); font-family: var(--font-body); font-weight: 500; font-size: clamp(0.62rem, 0.85vw, 0.78rem); text-align: center; color: var(--c-text); flex: 1; min-width: 90px; display: flex; flex-direction: column; justify-content: center; }
+.flow-node.active { border-color: var(--c-claude-border); background: var(--c-claude-light); }
+.flow-arrow { color: var(--c-text-tertiary); font-size: clamp(0.7rem, 1vw, 0.85rem); display: flex; align-items: center; }
+
+/* === PROCESS STEPS === */
+.steps { display: flex; flex-direction: column; gap: clamp(0.35rem, 0.7vh, 0.5rem); margin-top: clamp(0.5rem, 1.2vh, 1rem); }
+.step { display: flex; gap: clamp(0.5rem, 1vw, 0.8rem); align-items: flex-start; }
+.step-num { font-family: var(--font-display); font-weight: 600; font-size: clamp(0.9rem, 1.3vw, 1.1rem); color: var(--c-claude); min-width: 1.6em; line-height: 1.5; }
+.step-content { flex: 1; }
+.step-content h3 { margin-bottom: 0.1em; }
+.step-content p { font-size: clamp(0.72rem, 1vw, 0.88rem); }
+
+/* === COMPARE === */
+.compare { display: grid; grid-template-columns: 1fr auto 1fr; gap: clamp(0.5rem, 1vw, 0.8rem); align-items: center; margin-top: clamp(0.5rem, 1.2vh, 1rem); }
+.compare-col { background: var(--c-surface); border: 1px solid var(--c-border-light); border-radius: var(--radius); padding: clamp(0.7rem, 1.3vw, 1.1rem); }
+.compare-col.highlight { border-color: var(--c-claude-border); background: var(--c-claude-light); }
+.compare-arrow { font-size: clamp(1rem, 1.8vw, 1.4rem); color: var(--c-claude); }
+
+/* === BULLET LIST === */
+.bullet-list { list-style: none; padding: 0; margin-top: clamp(0.3rem, 0.8vh, 0.6rem); }
+.bullet-list li { padding: 0.25em 0 0.25em 1.2em; position: relative; }
+.bullet-list li::before { content: ''; position: absolute; left: 0; top: 0.65em; width: 4px; height: 4px; background: var(--c-claude); border-radius: 50%; }
+
+/* === CALLOUT === */
+.callout { background: var(--c-claude-light); border-left: 2.5px solid var(--c-claude); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: clamp(0.5rem, 1vw, 0.8rem) clamp(0.7rem, 1.3vw, 1rem); margin-top: clamp(0.4rem, 1vh, 0.8rem); }
+.callout p { color: var(--c-text-secondary); font-size: clamp(0.75rem, 1.05vw, 0.9rem); }
+
+/* === TABLE === */
+.table-wrap { width: 100%; margin-top: clamp(0.5rem, 1.2vh, 0.8rem); }
+table { width: 100%; border-collapse: collapse; font-size: clamp(0.7rem, 1vw, 0.85rem); }
+th { font-family: var(--font-body); font-weight: 500; text-align: left; padding: 0.5em 0.7em; border-bottom: 1.5px solid var(--c-text); color: var(--c-text); font-size: clamp(0.62rem, 0.85vw, 0.76rem); text-transform: uppercase; letter-spacing: 0.06em; }
+td { padding: 0.45em 0.7em; border-bottom: 1px solid var(--c-border); color: var(--c-text-secondary); }
+
+/* === SLIDE VARIANTS === */
+.slide-white { background: var(--c-surface); }
+.slide-warm { background: var(--c-surface-warm); }
+
+/* === ANIMATIONS === */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.anim { animation: fadeUp 0.65s ease-out both; }
+.d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.18s; } .d3 { animation-delay: 0.3s; }
+.reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* === NAV === */
+.nav-dots { position: fixed; right: clamp(0.8rem, 1.5vw, 1.2rem); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; z-index: 100; }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c-border); border: none; cursor: pointer; transition: background 0.25s, transform 0.25s; padding: 0; }
+.nav-dot.active { background: var(--c-claude); transform: scale(1.4); }
+.slide-counter { position: fixed; bottom: clamp(0.8rem, 1.5vh, 1.2rem); right: clamp(0.8rem, 2vw, 1.5rem); font-family: var(--font-body); font-size: clamp(0.58rem, 0.75vw, 0.68rem); color: var(--c-text-tertiary); letter-spacing: 0.08em; z-index: 100; }
+
+/* === RESPONSIVE === */
+@media (max-height: 700px) { h1 { font-size: clamp(1.7rem, 4vw, 2.8rem); } h2 { font-size: clamp(1.3rem, 2.8vw, 2rem); } .card { padding: clamp(0.5rem, 1vw, 0.7rem); } }
+@media (max-height: 600px) { h1 { font-size: clamp(1.4rem, 3.5vw, 2.2rem); } h2 { font-size: clamp(1.1rem, 2.4vw, 1.7rem); } }
+@media (max-height: 500px) { h1 { font-size: clamp(1.2rem, 3vw, 1.8rem); } .slide { padding: clamp(1rem, 2vh, 1.5rem) clamp(1.5rem, 4vw, 3rem); } }
+@media (max-width: 768px) { .cards-3 { grid-template-columns: 1fr; } .cards-2 { grid-template-columns: 1fr; } .flow { flex-direction: column; } .flow-arrow { transform: rotate(90deg); } .compare { grid-template-columns: 1fr; } .compare-arrow { transform: rotate(90deg); } .nav-dots { display: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<nav class="nav-dots" id="navDots"></nav>
+<div class="slide-counter" id="slideCounter">01 / 16</div>
+
+<!-- ============================================================ -->
+<!-- SLIDE 1: TITLE -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="0">
+  <div class="slide-inner" style="text-align:center;">
+    <div class="label anim">Comprehensive Analysis · 2025</div>
+    <h1 class="anim d1">AI in Urban Planning<br>Present &amp; Future</h1>
+    <hr class="rule anim d2" style="margin:clamp(0.6rem,1.5vh,1rem) auto;">
+    <p class="subtitle anim d3" style="margin:0 auto;">How AI solves urban problems today, the market driving adoption, and the paradigms shaping cities through 2030</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2: THE PROBLEM & OPPORTUNITY -->
+<!-- ============================================================ -->
+<section class="slide slide-white" data-slide="1">
+  <div class="slide-inner">
+    <div class="label reveal">Context</div>
+    <h2 class="reveal">The Planning Gap</h2>
+    <div class="compare reveal">
+      <div class="compare-col">
+        <h3 style="color:var(--c-text-tertiary);">Traditional Planning</h3>
+        <ul class="bullet-list">
+          <li>Static master plans updated every 10 years</li>
+          <li>Decisions based on anecdotal evidence</li>
+          <li>One-size-fits-all zoning rules</li>
+          <li>Public feedback via low-turnout town halls</li>
+        </ul>
+      </div>
+      <div class="compare-arrow">→</div>
+      <div class="compare-col highlight">
+        <h3 style="color:var(--c-claude);">AI-Enabled Planning</h3>
+        <ul class="bullet-list">
+          <li>Living models that update continuously</li>
+          <li>Evidence-based, multi-modal data analysis</li>
+          <li>Context-sensitive, adaptive design</li>
+          <li>NLP-powered sentiment analysis at scale</li>
+        </ul>
+      </div>
+    </div>
+    <p class="reveal small" style="text-align:center;margin-top:clamp(0.4rem,1vh,0.6rem);">68% of the global population will be urban by 2050 — cities need tools that match the pace and complexity of growth.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3: MARKET LANDSCAPE (1 slide, not 2) -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="2">
+  <div class="slide-inner">
+    <div class="label reveal">Market</div>
+    <h2 class="reveal">The Scale of Investment</h2>
+    <div class="cards cards-3 reveal">
+      <div class="stat">
+        <div class="stat-value">$13.6B</div>
+        <div class="stat-label">AI urban planning<br>market by 2035</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">$460B</div>
+        <div class="stat-label">AI in smart cities<br>market by 2034</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">27.8%</div>
+        <div class="stat-label">Smart city AI<br>compound growth rate</div>
+      </div>
+    </div>
+    <div class="callout reveal">
+      <p>Machine learning dominates current adoption; computer vision is the fastest-growing segment. Asia Pacific is leapfrogging traditional frameworks — adopting AI-powered planning from the outset.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4: HOW ML OPTIMIZES TRAFFIC -->
+<!-- ============================================================ -->
+<section class="slide slide-white" data-slide="3">
+  <div class="slide-inner">
+    <div class="label reveal">How It Works · Traffic</div>
+    <h2 class="reveal">ML-Driven Traffic Optimization</h2>
+    <p class="reveal" style="max-width:650px;">Instead of fixed signal schedules, ML models process real-time sensor data to dynamically adjust every intersection.</p>
+    <div class="flow reveal">
+      <div class="flow-node">Road sensors &amp;<br>camera feeds</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node active">ML predicts<br>demand per lane</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">Signals adjust<br>in real time</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">Pedestrians &amp;<br>EVs prioritized</div>
+    </div>
+    <div class="cards cards-2 reveal">
+      <div class="card">
+        <h3>SURTRAC — Carnegie Mellon</h3>
+        <p>Each intersection runs a local optimizer that communicates with neighbors — no centralized bottleneck. Scales across entire corridors.</p>
+      </div>
+      <div class="card">
+        <h3>Measured Impact</h3>
+        <div style="display:flex;gap:clamp(0.8rem,1.5vw,1.2rem);margin-top:0.4em;">
+          <div class="stat"><div class="stat-value" style="font-size:clamp(1.3rem,2.2vw,1.8rem);">−20%</div><div class="stat-label">traffic delays</div></div>
+          <div class="stat"><div class="stat-value" style="font-size:clamp(1.3rem,2.2vw,1.8rem);">−30%</div><div class="stat-label">building energy<br>(NREL)</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5: HOW AI MODELS ENERGY -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="4">
+  <div class="slide-inner">
+    <div class="label reveal">How It Works · Energy</div>
+    <h2 class="reveal">AI-Driven Building Energy Modeling</h2>
+    <p class="reveal" style="max-width:650px;">ML simulates the interaction between a building's geometry, materials, and environment — before construction begins.</p>
+    <div class="steps reveal">
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <h3>Simulate sunlight exposure</h3>
+          <p>Track sun angles across seasons to optimize window placement and shading for every façade.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <h3>Model airflow &amp; ventilation</h3>
+          <p>Computational fluid dynamics predicts wind corridors between buildings for natural ventilation design.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <h3>Predict heat island effects</h3>
+          <p>Map how paved surfaces, density, and green cover create localized temperature spikes.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">4</span>
+        <div class="step-content">
+          <h3>Optimize the neighborhood</h3>
+          <p>Building placement tuned to maximize natural light while minimizing cooling energy across the block.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6: COMPUTER VISION + NLP -->
+<!-- ============================================================ -->
+<section class="slide slide-white" data-slide="5">
+  <div class="slide-inner">
+    <div class="label reveal">How It Works · Awareness &amp; Voice</div>
+    <h2 class="reveal">Real-Time Monitoring &amp; Public Engagement</h2>
+    <div class="cards cards-2 reveal">
+      <div class="card" style="border-top:2px solid var(--c-claude);">
+        <h3>Computer Vision</h3>
+        <p>Processes camera and sensor feeds to detect shifting crowd flows, traffic anomalies, and environmental changes as they happen. Systems like SURTRAC coordinate signals dynamically — cutting stops and emissions.</p>
+        <p class="small" style="margin-top:0.3em;">Fastest-growing AI segment in urban tech</p>
+      </div>
+      <div class="card" style="border-top:2px solid var(--c-green);">
+        <h3>Natural Language Processing</h3>
+        <p>Analyzes citizen surveys, social media, and council transcripts at scale — surfacing community priorities, tracking sentiment shifts, and amplifying underrepresented voices that never attend town halls.</p>
+        <p class="small" style="margin-top:0.3em;">Makes inclusive, participatory planning operationally feasible</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 7: HOW GENAI DESIGNS NEIGHBORHOODS -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="6">
+  <div class="slide-inner">
+    <div class="label reveal">How It Works · Generative Design</div>
+    <h2 class="reveal">How Generative AI Designs Neighborhoods</h2>
+    <div class="steps reveal">
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <h3>Define constraints</h3>
+          <p>Planner inputs boundaries, zoning rules, flood maps, density targets, and sustainability requirements.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <h3>AI generates design variants</h3>
+          <p>GANs produce layouts in the "style" of existing cities. Diffusion models generate alternatives from text prompts.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <h3>Parametric optimization</h3>
+          <p>Height, orientation, and density tuned automatically for solar gain, wind flow, and drainage.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">4</span>
+        <div class="step-content">
+          <h3>Human-in-the-loop refinement</h3>
+          <p>Planners iterate via persona feedback — "How does a cyclist experience this?" — and the model adapts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 8: MODEL ARCHITECTURES -->
+<!-- ============================================================ -->
+<section class="slide slide-white" data-slide="7">
+  <div class="slide-inner">
+    <div class="label reveal">Under the Hood</div>
+    <h2 class="reveal">The Model Architectures</h2>
+    <div class="cards cards-3 reveal">
+      <div class="card">
+        <h3>GANs</h3>
+        <p>Image-to-image translation for urban layout infill and block morphology reconstruction. Balances adversarial loss with pixel-wise fidelity.</p>
+      </div>
+      <div class="card">
+        <h3>VAEs / CVAEs</h3>
+        <p>Encode spatial data into probabilistic latent space. Enable diverse design exploration while quantifying uncertainty via ELBO optimization.</p>
+      </div>
+      <div class="card">
+        <h3>Diffusion Models</h3>
+        <p>Multi-stage designs conditioned on spatial constraints and text prompts. ControlNet enables iterative refinement with persona-based feedback.</p>
+      </div>
+    </div>
+    <div class="callout reveal">
+      <p>Parametric urbanism: the city as tunable variables — building placement optimized for natural light, cooling, and drainage simultaneously.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 9: HOW DIGITAL TWINS WORK -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="8">
+  <div class="slide-inner">
+    <div class="label reveal">How It Works · Digital Twins</div>
+    <h2 class="reveal">Test Before You Build</h2>
+    <p class="reveal" style="max-width:650px;">A digital twin is a living virtual replica synchronized with real-time data — not a static map but a 4D model where time is the fourth dimension.</p>
+    <div class="flow reveal">
+      <div class="flow-node">Sensors, mobility<br>data, building stock</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node active">Live 4D model</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">"What-if"<br>scenario testing</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">Evidence-based<br>decisions</div>
+    </div>
+    <div class="callout reveal">
+      <p>GenAI supercharges the twin — generating synthetic data and predictive scenarios. "What happens to traffic if we add 500 units here?" "How does a new park shift the local microclimate?"</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 10: DIGITAL TWIN CASE STUDIES -->
+<!-- ============================================================ -->
+<section class="slide slide-white" data-slide="9">
+  <div class="slide-inner">
+    <div class="label reveal">Proof It Works</div>
+    <h2 class="reveal">Digital Twins in Action</h2>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>City</th><th>What They Built</th><th>What It Solved</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:500;">Singapore</td><td>National-scale digital twin</td><td>Microclimate &amp; transport simulation — projected $1B/yr savings</td></tr>
+          <tr><td style="font-weight:500;">Barcelona</td><td>15-minute city twin</td><td>Evaluated amenity access, improved transit equity</td></tr>
+          <tr><td style="font-weight:500;">Riyadh</td><td>Equity-aware optimization</td><td>13% reduction in extreme heat exposure; fewer road injuries</td></tr>
+          <tr><td style="font-weight:500;">Dubai</td><td>Real-time mobility twin</td><td>Cross-event traffic coordination in real time</td></tr>
+          <tr><td style="font-weight:500;">Athens</td><td>Lightweight "frugal" twin</td><td>Low-cost BIM + sensors for building-scale energy monitoring</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="reveal small" style="margin-top:clamp(0.3rem,0.8vh,0.5rem);">Athens proves digital twins don't require massive budgets — lightweight approaches work in resource-constrained cities.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 11: CHALLENGES -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="10">
+  <div class="slide-inner">
+    <div class="label reveal">Challenges</div>
+    <h2 class="reveal">What Has to Be Solved</h2>
+    <div class="cards cards-2 reveal">
+      <div class="card" style="border-top:2px solid var(--c-claude);">
+        <h3>The "Black Box" Problem</h3>
+        <p>If an algorithm rezones a neighborhood, residents need to understand why. Opaque models erode the public trust that democratic planning depends on.</p>
+      </div>
+      <div class="card" style="border-top:2px solid var(--c-green);">
+        <h3>Algorithmic Bias</h3>
+        <p>Models trained on historical disinvestment data perpetuate inequality — accelerating gentrification and displacing low-income communities.</p>
+      </div>
+      <div class="card" style="border-top:2px solid var(--c-blue);">
+        <h3>Data Fragmentation</h3>
+        <p>~28% of UK government systems are legacy. AI can't deliver on fragmented, incompatible, or outdated data foundations.</p>
+      </div>
+      <div class="card" style="border-top:2px solid var(--c-text-tertiary);">
+        <h3>Environmental Paradox</h3>
+        <p>AI data centers could need 123 GW by 2035. The infrastructure powering AI must not undermine the sustainability goals it serves.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 12: ETHICS & REGULATION -->
+<!-- ============================================================ -->
+<section class="slide slide-white" data-slide="11">
+  <div class="slide-inner">
+    <div class="label reveal">Governance</div>
+    <h2 class="reveal">Ethical &amp; Regulatory Landscape</h2>
+    <div class="cards cards-2 reveal">
+      <div class="card">
+        <h3>Global Standards</h3>
+        <ul class="bullet-list">
+          <li>OECD AI Principles (2024) — transparency, explainability, accountability</li>
+          <li>UN governance framework — bridging the Global North/South AI divide</li>
+          <li>Core pillars: fairness, privacy, human oversight</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>2025 Legislative Wave</h3>
+        <ul class="bullet-list">
+          <li>38 US states introduced AI regulation measures</li>
+          <li>Colorado AI Act — landmark high-risk AI framework</li>
+          <li>Algorithmic Impact Assessments becoming standard practice</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout reveal">
+      <p>AIAs function like environmental impact assessments — evaluating automated systems against equity metrics before deployment.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 13: AGENTIC AI -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="12">
+  <div class="slide-inner">
+    <div class="label reveal">What's Next</div>
+    <h2 class="reveal">Agentic AI: Systems That Act Autonomously</h2>
+    <p class="reveal" style="max-width:650px;">Current AI advises planners. Agentic AI will reason, plan, and coordinate across domains in real time.</p>
+    <div class="cards cards-3 reveal">
+      <div class="card" style="border-top:2px solid var(--c-claude);">
+        <h3>Task Planner Agent</h3>
+        <p>Integrates flood maps, zoning rules, and demographics into a coherent problem map.</p>
+      </div>
+      <div class="card" style="border-top:2px solid var(--c-green);">
+        <h3>Sustainability Agent</h3>
+        <p>Optimizes for net-zero energy and biodiversity in every design iteration.</p>
+      </div>
+      <div class="card" style="border-top:2px solid var(--c-blue);">
+        <h3>Participatory Agent</h3>
+        <p>Natural-language interaction with residents, translated into spatial configurations.</p>
+      </div>
+    </div>
+    <p class="reveal small" style="margin-top:clamp(0.3rem,0.8vh,0.5rem);">Projected market: $38.2B by 2030. These agents orchestrate as multi-agent systems — solving problems too complex for any single model.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 14: 2030 VISION -->
+<!-- ============================================================ -->
+<section class="slide slide-white" data-slide="13">
+  <div class="slide-inner">
+    <div class="label reveal">2030 Vision</div>
+    <h2 class="reveal">The Self-Managing City</h2>
+    <div class="cards cards-2 reveal">
+      <div class="card">
+        <h3>Adaptive Smart Grids</h3>
+        <p>Deep reinforcement learning balances loads automatically. Buildings trade energy via blockchain as "prosumers."</p>
+      </div>
+      <div class="card">
+        <h3>Vehicle-to-Everything (V2X)</h3>
+        <p>Traffic lights communicate directly with autonomous fleets. Edge computing eliminates congestion at the intersection.</p>
+      </div>
+      <div class="card">
+        <h3>Dynamic Zoning</h3>
+        <p>Street space repurposed in real time — parking becomes park space when demand drops, guided by live mobility twins.</p>
+      </div>
+      <div class="card">
+        <h3>Self-Optimizing Buildings</h3>
+        <p>ML-driven HVAC uses occupancy prediction to zone heating and cooling room by room.</p>
+      </div>
+    </div>
+    <p class="reveal small" style="margin-top:clamp(0.3rem,0.8vh,0.5rem);">The shift: from master plans updated once a decade to living models that evolve continuously as new data arrives.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 15: RECOMMENDATIONS -->
+<!-- ============================================================ -->
+<section class="slide" data-slide="14">
+  <div class="slide-inner">
+    <div class="label reveal">Strategic Roadmap</div>
+    <h2 class="reveal">Recommendations for Implementation</h2>
+    <ul class="bullet-list reveal" style="max-width:700px;">
+      <li><strong>Interoperable Data Commons</strong> — Open-access frameworks for seamless integration across departments and providers</li>
+      <li><strong>Mandatory Algorithmic Impact Assessments</strong> — Evaluate against equity and social justice metrics before every deployment</li>
+      <li><strong>Adaptive &amp; Frugal Technologies</strong> — Lightweight digital twins and low-cost sensors for resource-constrained environments</li>
+      <li><strong>Multi-Objective Optimization</strong> — Balance economic growth, environmental resilience, and social equity simultaneously</li>
+      <li><strong>Cross-Disciplinary Collaboration</strong> — Urban planners, AI researchers, social scientists, and community advocates together</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SLIDE 16: CLOSING -->
+<!-- ============================================================ -->
+<section class="slide slide-warm" data-slide="15">
+  <div class="slide-inner" style="text-align:center;">
+    <div class="label reveal">Closing</div>
+    <h1 class="reveal" style="margin-top:0.2em;">Smarter Tools,<br>More Humane Cities</h1>
+    <hr class="rule reveal" style="margin:clamp(0.5rem,1vh,0.8rem) auto;">
+    <p class="subtitle reveal" style="margin:0 auto;">AI doesn't replace planners — it gives them real-time awareness, generative design power, and scenario-testing capability they've never had. The technology is here. The question is governance.</p>
+    <div class="cards cards-3 reveal" style="margin-top:clamp(0.8rem,2vh,1.2rem);text-align:left;">
+      <div class="card">
+        <h3 style="color:var(--c-claude);">Build data commons</h3>
+        <p>Open, interoperable frameworks across every department.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--c-green);">Mandate AI audits</h3>
+        <p>Algorithmic Impact Assessments before deployment.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--c-blue);">Design for equity</h3>
+        <p>Growth, resilience, and fairness optimized together.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === JAVASCRIPT === -->
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const navDots = document.getElementById('navDots');
+  const counter = document.getElementById('slideCounter');
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'nav-dot';
+    d.setAttribute('aria-label', 'Slide ' + (i+1));
+    d.addEventListener('click', () => slides[i].scrollIntoView({ behavior: 'smooth' }));
+    navDots.appendChild(d);
+  });
+  const dots = document.querySelectorAll('.nav-dot');
+  const ro = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+  const so = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const idx = +e.target.dataset.slide;
+        dots.forEach((d,i) => d.classList.toggle('active', i === idx));
+        counter.textContent = String(idx+1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+      }
+    });
+  }, { threshold: 0.5 });
+  slides.forEach(s => so.observe(s));
+  let cur = 0;
+  document.addEventListener('keydown', e => {
+    if (['ArrowDown','ArrowRight',' '].includes(e.key)) {
+      e.preventDefault(); cur = Math.min(cur+1, total-1);
+      slides[cur].scrollIntoView({ behavior: 'smooth' });
+    } else if (['ArrowUp','ArrowLeft'].includes(e.key)) {
+      e.preventDefault(); cur = Math.max(cur-1, 0);
+      slides[cur].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+  const sync = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) cur = +e.target.dataset.slide; });
+  }, { threshold: 0.5 });
+  slides.forEach(s => sync.observe(s));
+})();
+</script>
+</body>
+</html>
